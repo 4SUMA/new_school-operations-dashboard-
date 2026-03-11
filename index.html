@@ -1,0 +1,1075 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>School Operations Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+/* =====================
+   RESET & ROOT
+   ===================== */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:        #f0f2f8;
+  --bg2:       #e8ebf4;
+  --white:     #ffffff;
+  --card:      #ffffff;
+  --border:    #e2e6f0;
+  --navy:      #0f1c3f;
+  --navy2:     #1a2d5a;
+  --accent:    #2563eb;
+  --accent2:   #4f46e5;
+  --green:     #059669;
+  --green-lt:  #d1fae5;
+  --orange:    #d97706;
+  --orange-lt: #fef3c7;
+  --red:       #dc2626;
+  --red-lt:    #fee2e2;
+  --purple:    #7c3aed;
+  --purple-lt: #ede9fe;
+  --teal:      #0891b2;
+  --teal-lt:   #cffafe;
+  --text:      #0f1c3f;
+  --text2:     #4b5680;
+  --text3:     #9aa3c0;
+  --font-h:    'Playfair Display', serif;
+  --font-b:    'Plus Jakarta Sans', sans-serif;
+  --r:         14px;
+  --r-sm:      9px;
+  --sh:        0 2px 16px rgba(15,28,63,0.07);
+  --sh2:       0 8px 40px rgba(15,28,63,0.12);
+}
+
+html { font-size: 14px; scroll-behavior: smooth; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-b);
+  display: flex;
+  min-height: 100vh;
+}
+
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+/* =====================
+   SIDEBAR
+   ===================== */
+.sidebar {
+  width: 220px;
+  min-height: 100vh;
+  background: var(--navy);
+  display: flex;
+  flex-direction: column;
+  padding: 26px 16px;
+  position: fixed;
+  top: 0; left: 0; bottom: 0;
+  z-index: 200;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 6px;
+  margin-bottom: 36px;
+}
+.logo-mark {
+  width: 38px; height: 38px;
+  background: var(--accent);
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.2rem;
+  flex-shrink: 0;
+}
+.logo-text { font-family: var(--font-h); font-size: 1.1rem; color: #fff; line-height: 1.1; }
+.logo-sub { font-size: 0.62rem; color: #6b7db3; font-family: var(--font-b); font-weight: 500; }
+
+.nav { flex: 1; display: flex; flex-direction: column; gap: 3px; }
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 10px 12px;
+  border-radius: var(--r-sm);
+  color: #8896c0;
+  text-decoration: none;
+  font-size: 0.82rem;
+  font-weight: 500;
+  transition: all 0.18s;
+  cursor: pointer;
+}
+.nav-item .ico { font-size: 1rem; width: 20px; text-align: center; }
+.nav-item:hover { background: rgba(255,255,255,0.07); color: #c8d0e8; }
+.nav-item.active { background: var(--accent); color: #fff; }
+
+.sidebar-footer {
+  border-top: 1px solid rgba(255,255,255,0.08);
+  padding-top: 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 10px;
+  background: rgba(255,255,255,0.05);
+  border-radius: var(--r-sm);
+  margin-top: 8px;
+}
+.av {
+  width: 34px; height: 34px;
+  background: linear-gradient(135deg, #2563eb, #7c3aed);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.7rem; font-weight: 700; color: #fff;
+  flex-shrink: 0;
+}
+.av-name { font-size: 0.77rem; color: #c8d0e8; font-weight: 600; }
+.av-role { font-size: 0.62rem; color: #6b7db3; }
+
+/* =====================
+   MAIN
+   ===================== */
+.main {
+  margin-left: 220px;
+  flex: 1;
+  padding: 28px 30px 56px;
+  max-width: calc(100vw - 220px);
+}
+
+/* =====================
+   TOPBAR
+   ===================== */
+.topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 28px;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+.topbar-title { font-family: var(--font-h); font-size: 1.7rem; color: var(--navy); letter-spacing: -0.4px; }
+.topbar-sub { font-size: 0.78rem; color: var(--text2); margin-top: 3px; }
+.topbar-right { display: flex; align-items: center; gap: 12px; }
+
+.search {
+  display: flex; align-items: center; gap: 8px;
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 9px 14px;
+  box-shadow: var(--sh);
+}
+.search input {
+  border: none; outline: none;
+  font-family: var(--font-b); font-size: 0.8rem;
+  color: var(--text);
+  background: transparent;
+  width: 160px;
+}
+.search input::placeholder { color: var(--text3); }
+
+.topbar-btn {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 9px 13px;
+  cursor: pointer;
+  font-size: 1rem;
+  box-shadow: var(--sh);
+  position: relative;
+  transition: box-shadow 0.2s;
+}
+.topbar-btn:hover { box-shadow: var(--sh2); }
+.notif-dot {
+  position: absolute; top: 6px; right: 7px;
+  width: 7px; height: 7px;
+  background: var(--red); border-radius: 50%;
+  border: 2px solid var(--white);
+}
+
+/* =====================
+   STAT CARDS
+   ===================== */
+.stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 20px;
+}
+.stat {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  padding: 20px;
+  box-shadow: var(--sh);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.2s, box-shadow 0.2s;
+  animation: fadeUp 0.5s ease both;
+}
+.stat:hover { transform: translateY(-3px); box-shadow: var(--sh2); }
+.stat::before {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 3px;
+}
+.stat.s1::before { background: var(--accent); }
+.stat.s2::before { background: var(--green); }
+.stat.s3::before { background: var(--orange); }
+.stat.s4::before { background: var(--purple); }
+.stat:nth-child(1) { animation-delay: 0.05s; }
+.stat:nth-child(2) { animation-delay: 0.1s; }
+.stat:nth-child(3) { animation-delay: 0.15s; }
+.stat:nth-child(4) { animation-delay: 0.2s; }
+
+.stat-top { display: flex; justify-content: space-between; align-items: flex-start; }
+.stat-icon {
+  width: 40px; height: 40px;
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.2rem;
+}
+.s1 .stat-icon { background: #dbeafe; }
+.s2 .stat-icon { background: var(--green-lt); }
+.s3 .stat-icon { background: var(--orange-lt); }
+.s4 .stat-icon { background: var(--purple-lt); }
+.stat-badge {
+  font-size: 0.65rem; font-weight: 700;
+  padding: 3px 8px; border-radius: 20px;
+}
+.up { background: var(--green-lt); color: var(--green); }
+.dn { background: var(--red-lt); color: var(--red); }
+
+.stat-val {
+  font-family: var(--font-h);
+  font-size: 1.95rem;
+  color: var(--navy);
+  line-height: 1;
+}
+.stat-lbl { font-size: 0.75rem; color: var(--text2); margin-top: 3px; }
+
+/* =====================
+   GRID LAYOUTS
+   ===================== */
+.row { display: grid; gap: 16px; margin-bottom: 20px; }
+.row-2-3 { grid-template-columns: 2fr 1.4fr; }
+.row-3   { grid-template-columns: repeat(3, 1fr); }
+.row-2   { grid-template-columns: 1fr 1fr; }
+.row-trend { grid-template-columns: 1fr; }
+
+/* =====================
+   CARD BASE
+   ===================== */
+.card {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  padding: 22px;
+  box-shadow: var(--sh);
+  animation: fadeUp 0.55s ease both;
+  animation-delay: 0.25s;
+}
+.card-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 18px;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.card-title {
+  font-family: var(--font-h);
+  font-size: 1rem;
+  color: var(--navy);
+  letter-spacing: -0.2px;
+}
+.pill {
+  font-size: 0.67rem; font-weight: 700;
+  padding: 4px 10px; border-radius: 20px;
+  white-space: nowrap;
+}
+.pill-blue   { background: #dbeafe; color: var(--accent); }
+.pill-green  { background: var(--green-lt); color: var(--green); }
+.pill-orange { background: var(--orange-lt); color: var(--orange); }
+.pill-red    { background: var(--red-lt); color: var(--red); }
+.pill-purple { background: var(--purple-lt); color: var(--purple); }
+.pill-teal   { background: var(--teal-lt); color: var(--teal); }
+
+/* =====================
+   ATTENDANCE
+   ===================== */
+.att-list { display: flex; flex-direction: column; gap: 13px; }
+.att-row { }
+.att-meta { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; }
+.att-class { font-size: 0.8rem; font-weight: 600; color: var(--text); }
+.att-count { font-size: 0.72rem; color: var(--text2); }
+.att-pct { font-size: 0.8rem; font-weight: 700; }
+.bar-track {
+  height: 8px; background: var(--bg2);
+  border-radius: 10px; overflow: hidden;
+}
+.bar-fill {
+  height: 100%; border-radius: 10px;
+  width: 0;
+  transition: width 1.2s cubic-bezier(.4,0,.2,1);
+}
+.bar-hi   { background: linear-gradient(90deg, #2563eb, #4f46e5); }
+.bar-mid  { background: linear-gradient(90deg, #d97706, #f59e0b); }
+.bar-low  { background: linear-gradient(90deg, #dc2626, #f97316); }
+
+/* =====================
+   FEE CHART
+   ===================== */
+.fee-wrap {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 8px auto 12px;
+  width: 180px; height: 180px;
+}
+.fee-center {
+  position: absolute;
+  text-align: center;
+  pointer-events: none;
+}
+.fee-big { font-family: var(--font-h); font-size: 1.6rem; color: var(--navy); }
+.fee-sm  { font-size: 0.68rem; color: var(--text2); }
+.fee-leg { display: flex; flex-direction: column; gap: 8px; }
+.leg-row { display: flex; align-items: center; gap: 8px; font-size: 0.77rem; color: var(--text2); }
+.leg-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+.leg-amt { margin-left: auto; font-weight: 700; color: var(--text); font-size: 0.77rem; }
+.fee-nums { display: flex; justify-content: space-around; border-top: 1px solid var(--border); padding-top: 14px; margin-top: 14px; }
+.fn { text-align: center; }
+.fn-v { font-family: var(--font-h); font-size: 1.1rem; color: var(--navy); }
+.fn-l { font-size: 0.65rem; color: var(--text2); margin-top: 2px; }
+
+/* =====================
+   STAFF
+   ===================== */
+.staff-top {
+  display: flex; gap: 18px; align-items: center; margin-bottom: 18px;
+}
+.staff-ring { position: relative; flex-shrink: 0; }
+.staff-center {
+  position: absolute; top: 50%; left: 50%;
+  transform: translate(-50%,-50%);
+  text-align: center; pointer-events: none;
+}
+.staff-big { font-family: var(--font-h); font-size: 1.05rem; color: var(--navy); }
+.staff-small { font-size: 0.6rem; color: var(--text2); }
+.staff-info { flex: 1; }
+.staff-kv { display: flex; justify-content: space-between; align-items: center; padding: 6px 0; border-bottom: 1px solid var(--border); }
+.staff-kv:last-child { border-bottom: none; }
+.sk-k { font-size: 0.75rem; color: var(--text2); }
+.sk-v { font-size: 0.75rem; font-weight: 700; color: var(--navy); }
+.dept-rows { display: flex; flex-direction: column; gap: 9px; }
+.dept-row { }
+.dr-top { display: flex; justify-content: space-between; margin-bottom: 4px; font-size: 0.73rem; }
+.dr-name { color: var(--text2); }
+.dr-val  { font-weight: 700; color: var(--text); }
+.dept-track { height: 5px; background: var(--bg2); border-radius: 10px; overflow: hidden; }
+.dept-fill { height: 100%; border-radius: 10px; width: 0; transition: width 1.2s cubic-bezier(.4,0,.2,1); background: linear-gradient(90deg, var(--accent), var(--accent2)); }
+.dept-fill.lo { background: linear-gradient(90deg, var(--orange), var(--red)); }
+
+/* =====================
+   EXAM RESULTS
+   ===================== */
+.exam-list { display: flex; flex-direction: column; gap: 13px; }
+.exam-row { }
+.ex-top { display: flex; justify-content: space-between; margin-bottom: 5px; align-items: center; }
+.ex-name { font-size: 0.8rem; font-weight: 600; color: var(--text); }
+.ex-avg  { font-size: 0.72rem; color: var(--text2); }
+.ex-bar-track { height: 9px; background: var(--bg2); border-radius: 10px; overflow: hidden; margin-bottom: 4px; }
+.ex-bar { height: 100%; border-radius: 10px; width: 0; transition: width 1.2s cubic-bezier(.4,0,.2,1); }
+.ex-foot { display: flex; justify-content: space-between; }
+.ex-pass { font-size: 0.67rem; color: var(--green); font-weight: 600; }
+.ex-fail { font-size: 0.67rem; color: var(--red); font-weight: 600; }
+
+/* =====================
+   TREND CHART
+   ===================== */
+.trend-tabs { display: flex; gap: 6px; }
+.ttab {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 5px 12px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  font-family: var(--font-b);
+  cursor: pointer;
+  color: var(--text2);
+  transition: all 0.18s;
+}
+.ttab.on { background: var(--navy); color: #fff; border-color: var(--navy); }
+.chart-box { height: 220px; position: relative; margin-top: 4px; }
+
+/* =====================
+   PERFORMERS
+   ===================== */
+.perf-tabs { display: flex; gap: 6px; }
+.ptab {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 5px 12px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  font-family: var(--font-b);
+  cursor: pointer;
+  color: var(--text2);
+  transition: all 0.18s;
+}
+.ptab.on { background: var(--navy); color: #fff; border-color: var(--navy); }
+.perf-list { display: flex; flex-direction: column; gap: 9px; }
+.perf-item {
+  display: flex; align-items: center; gap: 11px;
+  padding: 10px 12px;
+  background: var(--bg);
+  border-radius: var(--r-sm);
+  border: 1px solid var(--border);
+  transition: all 0.18s;
+}
+.perf-item:hover { box-shadow: var(--sh); border-color: #c8d0e8; }
+.perf-rank { font-size: 0.7rem; font-weight: 800; color: var(--text3); width: 22px; text-align: center; }
+.rank-gold   { color: #d97706; }
+.rank-silver { color: #64748b; }
+.rank-bronze { color: #92400e; }
+.perf-av {
+  width: 32px; height: 32px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.68rem; font-weight: 700; color: #fff;
+  flex-shrink: 0;
+}
+.perf-name { font-size: 0.78rem; font-weight: 600; color: var(--text); }
+.perf-cls  { font-size: 0.65rem; color: var(--text2); margin-top: 1px; }
+.perf-score { margin-left: auto; font-family: var(--font-h); font-size: 1rem; font-weight: 700; }
+
+/* =====================
+   EVENTS
+   ===================== */
+.events-list { display: flex; flex-direction: column; }
+.ev-item {
+  display: flex; align-items: center; gap: 12px;
+  padding: 11px 0;
+  border-bottom: 1px solid var(--border);
+}
+.ev-item:last-child { border-bottom: none; }
+.ev-time { font-size: 0.68rem; font-weight: 700; color: var(--text2); width: 36px; flex-shrink: 0; }
+.ev-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+.ev-name { font-size: 0.78rem; font-weight: 600; color: var(--text); }
+.ev-sub  { font-size: 0.65rem; color: var(--text2); margin-top: 2px; }
+.ev-tag {
+  margin-left: auto;
+  font-size: 0.62rem; font-weight: 700;
+  padding: 3px 8px; border-radius: 6px;
+  flex-shrink: 0;
+}
+
+/* =====================
+   ALERTS
+   ===================== */
+.alerts-list { display: flex; flex-direction: column; gap: 10px; }
+.al-item {
+  display: flex; gap: 12px; align-items: flex-start;
+  padding: 12px 14px;
+  border-radius: var(--r-sm);
+  border-left: 3px solid;
+  transition: box-shadow 0.18s;
+  animation: slideIn 0.4s ease both;
+}
+.al-item:hover { box-shadow: var(--sh); }
+@keyframes slideIn { from { opacity:0; transform:translateX(10px); } to { opacity:1; transform:none; } }
+.al-item:nth-child(1) { animation-delay:0s; }
+.al-item:nth-child(2) { animation-delay:0.07s; }
+.al-item:nth-child(3) { animation-delay:0.14s; }
+.al-item:nth-child(4) { animation-delay:0.21s; }
+.al-item:nth-child(5) { animation-delay:0.28s; }
+
+.al-crit { background: var(--red-lt); border-color: var(--red); }
+.al-warn { background: var(--orange-lt); border-color: var(--orange); }
+.al-info { background: #dbeafe; border-color: var(--accent); }
+
+.al-ico { font-size: 1.05rem; flex-shrink: 0; margin-top: 1px; }
+.al-title { font-size: 0.79rem; font-weight: 700; color: var(--navy); }
+.al-desc  { font-size: 0.68rem; color: var(--text2); margin-top: 2px; line-height: 1.45; }
+.al-act {
+  display: inline-block; margin-top: 6px;
+  font-size: 0.67rem; font-weight: 700;
+  color: var(--accent); cursor: pointer; text-decoration: none;
+}
+.al-act:hover { text-decoration: underline; }
+
+/* =====================
+   ANIMATIONS
+   ===================== */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: none; }
+}
+
+/* =====================
+   RESPONSIVE
+   ===================== */
+@media (max-width: 1300px) {
+  .stats { grid-template-columns: repeat(2,1fr); }
+  .row-2-3 { grid-template-columns: 1fr; }
+  .row-3   { grid-template-columns: 1fr 1fr; }
+}
+@media (max-width: 960px) {
+  .sidebar { width: 56px; padding: 18px 8px; }
+  .logo-text,.logo-sub,.nav-item span:last-child,.av-name,.av-role { display: none; }
+  .nav-item { justify-content: center; }
+  .logo { justify-content: center; }
+  .sidebar-footer { justify-content: center; }
+  .main { margin-left: 56px; max-width: calc(100vw - 56px); padding: 18px 14px 40px; }
+  .row-3 { grid-template-columns: 1fr; }
+  .row-2 { grid-template-columns: 1fr; }
+}
+@media (max-width: 600px) {
+  .stats { grid-template-columns: 1fr; }
+  .topbar { flex-direction: column; }
+  .search input { width: 120px; }
+}
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="logo">
+    <div class="logo-mark">🎓</div>
+    <div>
+      <div class="logo-text">Vidya<br>Mandir</div>
+      <div class="logo-sub">Admin Portal</div>
+    </div>
+  </div>
+  <nav class="nav">
+    <div class="nav-item active"><span class="ico">⊞</span><span>Dashboard</span></div>
+    <div class="nav-item"><span class="ico">👤</span><span>Students</span></div>
+    <div class="nav-item"><span class="ico">👩‍🏫</span><span>Staff</span></div>
+    <div class="nav-item"><span class="ico">📋</span><span>Exams</span></div>
+    <div class="nav-item"><span class="ico">💳</span><span>Finance</span></div>
+    <div class="nav-item"><span class="ico">📅</span><span>Timetable</span></div>
+    <div class="nav-item"><span class="ico">📢</span><span>Notice Board</span></div>
+    <div class="nav-item"><span class="ico">⚙️</span><span>Settings</span></div>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="av">PA</div>
+    <div>
+      <div class="av-name">Dr. P. Anand</div>
+      <div class="av-role">Principal</div>
+    </div>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<main class="main">
+
+  <!-- TOPBAR -->
+  <header class="topbar">
+    <div>
+      <div class="topbar-title">Operations Dashboard</div>
+      <div class="topbar-sub" id="dateStr"></div>
+    </div>
+    <div class="topbar-right">
+      <div class="search">
+        <span>🔍</span>
+        <input type="text" placeholder="Search students, staff…"/>
+      </div>
+      <button class="topbar-btn">📅</button>
+      <button class="topbar-btn">
+        🔔
+        <span class="notif-dot"></span>
+      </button>
+    </div>
+  </header>
+
+  <!-- STAT CARDS -->
+  <section class="stats">
+    <div class="stat s1">
+      <div class="stat-top">
+        <div class="stat-icon">👤</div>
+        <div class="stat-badge up">↑ 3.2%</div>
+      </div>
+      <div>
+        <div class="stat-val" data-t="1248">0</div>
+        <div class="stat-lbl">Total Students</div>
+      </div>
+    </div>
+    <div class="stat s2">
+      <div class="stat-top">
+        <div class="stat-icon">✅</div>
+        <div class="stat-badge up">↑ 1.5%</div>
+      </div>
+      <div>
+        <div class="stat-val" data-t="91" data-s="%">0</div>
+        <div class="stat-lbl">Attendance Today</div>
+      </div>
+    </div>
+    <div class="stat s3">
+      <div class="stat-top">
+        <div class="stat-icon">💰</div>
+        <div class="stat-badge dn">↓ 2.1%</div>
+      </div>
+      <div>
+        <div class="stat-val" data-p="₹" data-t="84" data-s="L">0</div>
+        <div class="stat-lbl">Fees Collected</div>
+      </div>
+    </div>
+    <div class="stat s4">
+      <div class="stat-top">
+        <div class="stat-icon">👩‍🏫</div>
+        <div class="stat-badge up">↑ 0.8%</div>
+      </div>
+      <div>
+        <div class="stat-val" data-t="56" data-s="/62">0</div>
+        <div class="stat-lbl">Staff Present</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ROW: Attendance + Fee -->
+  <div class="row row-2-3">
+
+    <!-- Attendance -->
+    <div class="card">
+      <div class="card-head">
+        <div class="card-title">Attendance Overview</div>
+        <select style="background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:5px 10px;font-family:var(--font-b);font-size:0.73rem;color:var(--text2);outline:none;cursor:pointer;">
+          <option>This Week</option><option>Last Week</option><option>This Month</option>
+        </select>
+      </div>
+      <div class="att-list">
+        <div class="att-row">
+          <div class="att-meta"><span class="att-class">Grade 1 — Sec A</span><span class="att-count">48 / 50 present</span><span class="att-pct" style="color:var(--accent)">96%</span></div>
+          <div class="bar-track"><div class="bar-fill bar-hi" style="--w:96%"></div></div>
+        </div>
+        <div class="att-row">
+          <div class="att-meta"><span class="att-class">Grade 3 — Sec B</span><span class="att-count">44 / 48 present</span><span class="att-pct" style="color:var(--accent)">92%</span></div>
+          <div class="bar-track"><div class="bar-fill bar-hi" style="--w:92%"></div></div>
+        </div>
+        <div class="att-row">
+          <div class="att-meta"><span class="att-class">Grade 5 — Sec A</span><span class="att-count">41 / 46 present</span><span class="att-pct" style="color:var(--accent)">89%</span></div>
+          <div class="bar-track"><div class="bar-fill bar-hi" style="--w:89%"></div></div>
+        </div>
+        <div class="att-row">
+          <div class="att-meta"><span class="att-class">Grade 6 — Sec C</span><span class="att-count">37 / 44 present</span><span class="att-pct" style="color:var(--orange)">84%</span></div>
+          <div class="bar-track"><div class="bar-fill bar-mid" style="--w:84%"></div></div>
+        </div>
+        <div class="att-row">
+          <div class="att-meta"><span class="att-class">Grade 8 — Sec A</span><span class="att-count">33 / 44 present</span><span class="att-pct" style="color:var(--orange)">75%</span></div>
+          <div class="bar-track"><div class="bar-fill bar-mid" style="--w:75%"></div></div>
+        </div>
+        <div class="att-row">
+          <div class="att-meta"><span class="att-class">Grade 4 — Sec D</span><span class="att-count">30 / 46 present</span><span class="att-pct" style="color:var(--red)">65%</span></div>
+          <div class="bar-track"><div class="bar-fill bar-low" style="--w:65%"></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Fee Collection -->
+    <div class="card">
+      <div class="card-head">
+        <div class="card-title">Fee Collection</div>
+        <div class="pill pill-blue">March 2025</div>
+      </div>
+      <div class="fee-wrap">
+        <canvas id="feeChart" width="180" height="180"></canvas>
+        <div class="fee-center">
+          <div class="fee-big">68%</div>
+          <div class="fee-sm">Collected</div>
+        </div>
+      </div>
+      <div class="fee-leg">
+        <div class="leg-row"><div class="leg-dot" style="background:#059669"></div>Paid <div class="leg-amt">₹84L</div></div>
+        <div class="leg-row"><div class="leg-dot" style="background:#d97706"></div>Pending <div class="leg-amt">₹28L</div></div>
+        <div class="leg-row"><div class="leg-dot" style="background:#dc2626"></div>Overdue <div class="leg-amt">₹12L</div></div>
+      </div>
+      <div class="fee-nums">
+        <div class="fn"><div class="fn-v">324</div><div class="fn-l">Paid</div></div>
+        <div class="fn"><div class="fn-v">118</div><div class="fn-l">Pending</div></div>
+        <div class="fn"><div class="fn-v">54</div><div class="fn-l">Overdue</div></div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ROW: Staff + Exam -->
+  <div class="row row-2">
+
+    <!-- Staff Presence -->
+    <div class="card">
+      <div class="card-head">
+        <div class="card-title">Staff Presence</div>
+        <div class="pill pill-green">Today — 56/62</div>
+      </div>
+      <div class="staff-top">
+        <div class="staff-ring">
+          <canvas id="staffChart" width="120" height="120"></canvas>
+          <div class="staff-center">
+            <div class="staff-big">90%</div>
+            <div class="staff-small">Present</div>
+          </div>
+        </div>
+        <div class="staff-info">
+          <div class="staff-kv"><span class="sk-k">On Leave</span><span class="sk-v" style="color:var(--orange)">4</span></div>
+          <div class="staff-kv"><span class="sk-k">Late Arrival</span><span class="sk-v" style="color:var(--accent)">2</span></div>
+          <div class="staff-kv"><span class="sk-k">Sub Arranged</span><span class="sk-v" style="color:var(--green)">3</span></div>
+          <div class="staff-kv"><span class="sk-k">Total Staff</span><span class="sk-v">62</span></div>
+        </div>
+      </div>
+      <div class="dept-rows">
+        <div class="dept-row">
+          <div class="dr-top"><span class="dr-name">Science</span><span class="dr-val">12/12</span></div>
+          <div class="dept-track"><div class="dept-fill" style="--dp:100%"></div></div>
+        </div>
+        <div class="dept-row">
+          <div class="dr-top"><span class="dr-name">Mathematics</span><span class="dr-val">9/10</span></div>
+          <div class="dept-track"><div class="dept-fill" style="--dp:90%"></div></div>
+        </div>
+        <div class="dept-row">
+          <div class="dr-top"><span class="dr-name">Languages</span><span class="dr-val">9/12</span></div>
+          <div class="dept-track"><div class="dept-fill lo" style="--dp:75%"></div></div>
+        </div>
+        <div class="dept-row">
+          <div class="dr-top"><span class="dr-name">Social Studies</span><span class="dr-val">7/8</span></div>
+          <div class="dept-track"><div class="dept-fill" style="--dp:88%"></div></div>
+        </div>
+        <div class="dept-row">
+          <div class="dr-top"><span class="dr-name">Arts & PE</span><span class="dr-val">19/20</span></div>
+          <div class="dept-track"><div class="dept-fill" style="--dp:95%"></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Exam Results -->
+    <div class="card">
+      <div class="card-head">
+        <div class="card-title">Exam Results Summary</div>
+        <div class="pill pill-purple">Term 2 · 2025</div>
+      </div>
+      <div class="exam-list">
+        <div class="exam-row">
+          <div class="ex-top"><span class="ex-name">Mathematics</span><span class="ex-avg">Avg: 74.2 / 100</span></div>
+          <div class="ex-bar-track"><div class="ex-bar bar-hi" style="--ew:74.2%"></div></div>
+          <div class="ex-foot"><span class="ex-pass">✓ Pass 88%</span><span class="ex-fail">✗ Fail 12%</span></div>
+        </div>
+        <div class="exam-row">
+          <div class="ex-top"><span class="ex-name">Science</span><span class="ex-avg">Avg: 79.8 / 100</span></div>
+          <div class="ex-bar-track"><div class="ex-bar" style="--ew:79.8%; background:linear-gradient(90deg,#059669,#10b981)"></div></div>
+          <div class="ex-foot"><span class="ex-pass">✓ Pass 93%</span><span class="ex-fail">✗ Fail 7%</span></div>
+        </div>
+        <div class="exam-row">
+          <div class="ex-top"><span class="ex-name">English</span><span class="ex-avg">Avg: 81.5 / 100</span></div>
+          <div class="ex-bar-track"><div class="ex-bar" style="--ew:81.5%; background:linear-gradient(90deg,#0891b2,#06b6d4)"></div></div>
+          <div class="ex-foot"><span class="ex-pass">✓ Pass 95%</span><span class="ex-fail">✗ Fail 5%</span></div>
+        </div>
+        <div class="exam-row">
+          <div class="ex-top"><span class="ex-name">Social Studies</span><span class="ex-avg">Avg: 67.3 / 100</span></div>
+          <div class="ex-bar-track"><div class="ex-bar bar-mid" style="--ew:67.3%"></div></div>
+          <div class="ex-foot"><span class="ex-pass">✓ Pass 82%</span><span class="ex-fail">✗ Fail 18%</span></div>
+        </div>
+        <div class="exam-row">
+          <div class="ex-top"><span class="ex-name">Hindi</span><span class="ex-avg">Avg: 71.0 / 100</span></div>
+          <div class="ex-bar-track"><div class="ex-bar" style="--ew:71%; background:linear-gradient(90deg,#7c3aed,#a855f7)"></div></div>
+          <div class="ex-foot"><span class="ex-pass">✓ Pass 85%</span><span class="ex-fail">✗ Fail 15%</span></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ROW: Monthly Trend -->
+  <div class="row row-trend">
+    <div class="card">
+      <div class="card-head">
+        <div class="card-title">Monthly Trends</div>
+        <div class="trend-tabs">
+          <button class="ttab on" data-k="att">Attendance</button>
+          <button class="ttab" data-k="fee">Fee Collection</button>
+          <button class="ttab" data-k="perf">Performance</button>
+        </div>
+      </div>
+      <div class="chart-box"><canvas id="trendChart"></canvas></div>
+    </div>
+  </div>
+
+  <!-- ROW: Performers + Events + Alerts -->
+  <div class="row row-3">
+
+    <!-- Performers -->
+    <div class="card">
+      <div class="card-head">
+        <div class="card-title">Student Performers</div>
+        <div class="perf-tabs">
+          <button class="ptab on" id="topBtn">🏆 Top</button>
+          <button class="ptab" id="lowBtn">⚠️ Needs Help</button>
+        </div>
+      </div>
+      <div class="perf-list" id="perfList"></div>
+    </div>
+
+    <!-- Today's Events -->
+    <div class="card">
+      <div class="card-head">
+        <div class="card-title">Today's Events</div>
+        <div class="pill pill-teal">5 Scheduled</div>
+      </div>
+      <div class="events-list">
+        <div class="ev-item">
+          <div class="ev-time">08:00</div>
+          <div class="ev-dot" style="background:#2563eb"></div>
+          <div><div class="ev-name">Morning Assembly</div><div class="ev-sub">All Students · Auditorium</div></div>
+          <div class="ev-tag" style="background:#dbeafe;color:#2563eb">School</div>
+        </div>
+        <div class="ev-item">
+          <div class="ev-time">10:30</div>
+          <div class="ev-dot" style="background:#059669"></div>
+          <div><div class="ev-name">Science Olympiad Prep</div><div class="ev-sub">Grade 7-8 · Lab 2</div></div>
+          <div class="ev-tag" style="background:#d1fae5;color:#059669">Academic</div>
+        </div>
+        <div class="ev-item">
+          <div class="ev-time">12:00</div>
+          <div class="ev-dot" style="background:#d97706"></div>
+          <div><div class="ev-name">Parent-Teacher Meeting</div><div class="ev-sub">Grade 5 · Hall B</div></div>
+          <div class="ev-tag" style="background:#fef3c7;color:#d97706">PTM</div>
+        </div>
+        <div class="ev-item">
+          <div class="ev-time">14:00</div>
+          <div class="ev-dot" style="background:#7c3aed"></div>
+          <div><div class="ev-name">Staff Dev. Workshop</div><div class="ev-sub">All Teaching Staff · Conf Room</div></div>
+          <div class="ev-tag" style="background:#ede9fe;color:#7c3aed">Staff</div>
+        </div>
+        <div class="ev-item">
+          <div class="ev-time">16:00</div>
+          <div class="ev-dot" style="background:#ec4899"></div>
+          <div><div class="ev-name">Annual Day Rehearsal</div><div class="ev-sub">Cultural Cmte · Main Stage</div></div>
+          <div class="ev-tag" style="background:#fce7f3;color:#ec4899">Cultural</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Alerts -->
+    <div class="card">
+      <div class="card-head">
+        <div class="card-title">Alerts & Action Items</div>
+        <div class="pill pill-red" id="alBadge">3 Critical</div>
+      </div>
+      <div class="alerts-list" id="alertsList"></div>
+    </div>
+
+  </div>
+
+</main>
+
+<script>
+/* ---- Date ---- */
+document.getElementById('dateStr').textContent =
+  new Date().toLocaleDateString('en-IN',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+
+/* ---- Counter Animate ---- */
+function counter(el) {
+  const t = +el.dataset.t, p = el.dataset.p||'', s = el.dataset.s||'';
+  const dur = 1100, start = performance.now();
+  (function tick(now) {
+    const prog = Math.min((now-start)/dur,1);
+    const ease = 1-Math.pow(1-prog,3);
+    el.textContent = p + Math.floor(ease*t) + s;
+    if (prog<1) requestAnimationFrame(tick);
+    else el.textContent = p+t+s;
+  })(start);
+}
+document.querySelectorAll('.stat-val[data-t]').forEach(el => {
+  new IntersectionObserver(e => { if(e[0].isIntersecting){ counter(el); e[0].target._io?.disconnect(); } })
+  .observe(el);
+});
+
+/* ---- Animate Bars ---- */
+function initBars() {
+  document.querySelectorAll('.bar-fill').forEach(b => {
+    const w = b.style.getPropertyValue('--w');
+    b.style.width = '0';
+    setTimeout(() => b.style.width = w, 400);
+  });
+  document.querySelectorAll('.dept-fill').forEach(b => {
+    const w = b.style.getPropertyValue('--dp');
+    b.style.width = '0';
+    setTimeout(() => b.style.width = w, 500);
+  });
+  document.querySelectorAll('.ex-bar').forEach(b => {
+    const w = b.style.getPropertyValue('--ew');
+    b.style.width = '0';
+    setTimeout(() => b.style.width = w, 450);
+  });
+}
+window.addEventListener('load', initBars);
+
+/* ---- Fee Donut ---- */
+new Chart(document.getElementById('feeChart'), {
+  type: 'doughnut',
+  data: {
+    labels: ['Paid','Pending','Overdue'],
+    datasets:[{
+      data:[84,28,12],
+      backgroundColor:['#059669','#d97706','#dc2626'],
+      borderColor:'#fff', borderWidth:3, hoverOffset:5
+    }]
+  },
+  options:{
+    cutout:'72%',
+    plugins:{
+      legend:{display:false},
+      tooltip:{
+        backgroundColor:'#0f1c3f', titleColor:'#fff', bodyColor:'#9aa3c0',
+        borderColor:'#e2e6f0', borderWidth:1, padding:10,
+        callbacks:{ label: c => ` ₹${c.parsed}L` }
+      }
+    },
+    animation:{ animateRotate:true, duration:1200 }
+  }
+});
+
+/* ---- Staff Ring ---- */
+new Chart(document.getElementById('staffChart'), {
+  type: 'doughnut',
+  data:{
+    labels:['Present','Absent'],
+    datasets:[{
+      data:[56,6],
+      backgroundColor:['#2563eb','#e2e6f0'],
+      borderColor:'#fff', borderWidth:2
+    }]
+  },
+  options:{
+    cutout:'75%',
+    plugins:{ legend:{display:false}, tooltip:{enabled:false} },
+    animation:{ animateRotate:true, duration:1200 }
+  }
+});
+
+/* ---- Trend Chart ---- */
+const months = ['Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec','Jan','Feb','Mar'];
+const tData = {
+  att: { label:'Attendance %', data:[87,89,91,88,92,90,93,91,89,94,91,90], color:'#2563eb', bg:'rgba(37,99,235,0.08)' },
+  fee: { label:'Fee Collected (₹L)', data:[60,72,68,80,76,84,79,88,82,91,84,87], color:'#059669', bg:'rgba(5,150,105,0.08)' },
+  perf:{ label:'Avg Score %', data:[68,71,73,70,74,72,76,74,77,75,78,80], color:'#7c3aed', bg:'rgba(124,58,237,0.08)' }
+};
+let tChart;
+function drawTrend(k) {
+  const d = tData[k];
+  if (tChart) tChart.destroy();
+  tChart = new Chart(document.getElementById('trendChart'), {
+    type:'line',
+    data:{
+      labels: months,
+      datasets:[{
+        label: d.label, data: d.data,
+        borderColor: d.color, backgroundColor: d.bg,
+        fill:true, tension:0.42,
+        pointBackgroundColor: d.color, pointBorderColor:'#fff',
+        pointBorderWidth:2, pointRadius:4, pointHoverRadius:7
+      }]
+    },
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      plugins:{
+        legend:{display:false},
+        tooltip:{
+          backgroundColor:'#0f1c3f', titleColor:'#fff', bodyColor:'#9aa3c0',
+          borderColor:'#e2e6f0', borderWidth:1, padding:12
+        }
+      },
+      scales:{
+        x:{ grid:{color:'rgba(0,0,0,0.04)'}, ticks:{color:'#4b5680',font:{family:"'Plus Jakarta Sans',sans-serif",size:11}} },
+        y:{ grid:{color:'rgba(0,0,0,0.04)'}, ticks:{color:'#4b5680',font:{family:"'Plus Jakarta Sans',sans-serif",size:11}} }
+      },
+      animation:{ duration:800, easing:'easeInOutQuart' }
+    }
+  });
+}
+drawTrend('att');
+document.querySelectorAll('.ttab').forEach(b => {
+  b.addEventListener('click', () => {
+    document.querySelectorAll('.ttab').forEach(x => x.classList.remove('on'));
+    b.classList.add('on');
+    drawTrend(b.dataset.k);
+  });
+});
+
+/* ---- Performers ---- */
+const top5 = [
+  {r:1,n:'Ananya Sharma',  g:'Grade 8 — Sec A', s:97.4, c:'#2563eb'},
+  {r:2,n:'Rohan Mehta',    g:'Grade 9 — Sec B', s:96.1, c:'#7c3aed'},
+  {r:3,n:'Priya Iyer',     g:'Grade 7 — Sec A', s:95.8, c:'#059669'},
+  {r:4,n:'Aditya Kumar',   g:'Grade 10 — Sec C',s:94.3, c:'#d97706'},
+  {r:5,n:'Sneha Patel',    g:'Grade 8 — Sec B', s:93.9, c:'#ec4899'},
+];
+const low5 = [
+  {r:1,n:'Ravi Nair',      g:'Grade 6 — Sec C', s:41.2, c:'#dc2626'},
+  {r:2,n:'Komal Singh',    g:'Grade 5 — Sec A', s:44.6, c:'#d97706'},
+  {r:3,n:'Deepak Rao',     g:'Grade 7 — Sec B', s:46.0, c:'#7c3aed'},
+  {r:4,n:'Meena Verma',    g:'Grade 4 — Sec D', s:48.3, c:'#dc2626'},
+  {r:5,n:'Arjun Das',      g:'Grade 6 — Sec A', s:50.1, c:'#d97706'},
+];
+const rankCls = ['rank-gold','rank-silver','rank-bronze','',''];
+function initials(n){ return n.split(' ').map(x=>x[0]).join('').slice(0,2).toUpperCase(); }
+function renderPerf(list, isTop) {
+  const el = document.getElementById('perfList');
+  el.innerHTML = '';
+  list.forEach((p,i) => {
+    const div = document.createElement('div');
+    div.className = 'perf-item';
+    div.style.animationDelay = i*0.06+'s';
+    div.innerHTML = `
+      <div class="perf-rank ${rankCls[i]}">#${p.r}</div>
+      <div class="perf-av" style="background:${p.c}22;color:${p.c}">${initials(p.n)}</div>
+      <div><div class="perf-name">${p.n}</div><div class="perf-cls">${p.g}</div></div>
+      <div class="perf-score" style="color:${isTop?'#059669':'#dc2626'}">${p.s}%</div>
+    `;
+    el.appendChild(div);
+  });
+}
+renderPerf(top5, true);
+document.getElementById('topBtn').addEventListener('click', function(){
+  this.classList.add('on'); document.getElementById('lowBtn').classList.remove('on');
+  renderPerf(top5,true);
+});
+document.getElementById('lowBtn').addEventListener('click', function(){
+  this.classList.add('on'); document.getElementById('topBtn').classList.remove('on');
+  renderPerf(low5,false);
+});
+
+/* ---- Alerts ---- */
+const alerts = [
+  {t:'critical',ico:'🚨',title:'54 Overdue Fee Accounts',desc:'Students unpaid for 30+ days. Parent notices required immediately.',act:'Send Reminders →'},
+  {t:'critical',ico:'⚠️',title:'Grade 4 Attendance at 65%',desc:'Sharp drop this week. Counsellor follow-up and parent call needed.',act:'View Report →'},
+  {t:'critical',ico:'📋',title:'Term 2 Marks Pending',desc:'3 subject teachers have not submitted grades. Deadline: Today.',act:'Notify Teachers →'},
+  {t:'warning', ico:'👩‍🏫',title:'3 Staff on Leave',desc:'Languages dept short-staffed. Substitute arrangement needed.',act:'Manage →'},
+  {t:'info',    ico:'ℹ️',title:'Science Olympiad Tomorrow',desc:'Confirm 24 students registered and Lab 2 is booked.',act:'Confirm →'},
+];
+const alMap = {critical:'al-crit',warning:'al-warn',info:'al-info'};
+const alList = document.getElementById('alertsList');
+alerts.forEach((a,i) => {
+  const d = document.createElement('div');
+  d.className = `al-item ${alMap[a.t]}`;
+  d.style.animationDelay = i*0.07+'s';
+  d.innerHTML = `<div class="al-ico">${a.ico}</div>
+    <div><div class="al-title">${a.title}</div>
+    <div class="al-desc">${a.desc}</div>
+    <span class="al-act">${a.act}</span></div>`;
+  alList.appendChild(d);
+});
+const crit = alerts.filter(a=>a.t==='critical').length;
+document.getElementById('alBadge').textContent = `${crit} Critical`;
+</script>
+</body>
+</html>
